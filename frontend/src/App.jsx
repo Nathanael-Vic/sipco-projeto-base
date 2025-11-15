@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from './supabaseClient' 
+import DataHallMap from './DataHallMap';
 
 function Login() {
   const [email, setEmail] = useState('')
@@ -49,40 +50,57 @@ function Login() {
 }
 
 function Dashboard({ session }) {
-  const [racks, setRacks] = useState([])
-  const [loadingRacks, setLoadingRacks] = useState(true)
+  const [racks, setRacks] = useState([]); 
+  const [eletrocalhas, setEletrocalhas] = useState([]); 
+  const [loading, setLoading] = useState(true); 
 
   useEffect(() => {
-    const apiUrl = import.meta.env.VITE_API_BASE_URL + "/racks"
-    
-    fetch(apiUrl)
-      .then(res => res.json())
-      .then(data => {
-        setRacks(data.racks || [])
-        setLoadingRacks(false)
-      })
-      .catch(err => {
-        console.error("Erro ao buscar racks:", err)
-        setLoadingRacks(false)
-      })
-  }, [])
+    const fetchInfraData = async () => {
+      try {
+        const racksApiUrl = import.meta.env.VITE_API_BASE_URL + "/racks";
+        const calhasApiUrl = import.meta.env.VITE_API_BASE_URL + "/eletrocalhas";
+
+        const [racksResponse, calhasResponse] = await Promise.all([
+          fetch(racksApiUrl),
+          fetch(calhasApiUrl)
+        ]);
+
+        const racksData = await racksResponse.json();
+        const calhasData = await calhasResponse.json();
+
+        setRacks(racksData.racks || []);
+        setEletrocalhas(calhasData.eletrocalhas || []);
+
+      } catch (err) {
+        console.error("Erro ao buscar dados da infraestrutura:", err);
+        alert("Erro ao carregar dados do backend. Veja o console.");
+      } finally {
+        setLoading(false); 
+      }
+    };
+
+    fetchInfraData();
+  }, []); 
 
   return (
-    <div style={{ padding: '20px' }}>
-      <h2>Dashboard (HU03)</h2>
-      <p>Bem-vindo, {session.user.email}</p>
-      <button onClick={() => supabase.auth.signOut()}>Sair</button>
-      
+    <div style={{ padding: '20px', width: '100%' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h2>Dashboard (HU03 - Visualização da Planta)</h2>
+        <div>
+          <span style={{ marginRight: '10px' }}>Bem-vindo, {session.user.email}</span>
+          <button onClick={() => supabase.auth.signOut()}>Sair</button>
+        </div>
+      </div>
+
       <hr/>
 
-      <h3>Racks (Buscados do FastAPI):</h3>
-      {loadingRacks ? <p>Carregando racks...</p> : (
-        <pre style={{ background: '#eee', padding: '10px' }}>
-          {JSON.stringify(racks, null, 2)}
-        </pre>
+      {loading ? (
+        <p>Carregando mapa e infraestrutura...</p>
+      ) : (
+        <DataHallMap racks={racks} eletrocalhas={eletrocalhas} />
       )}
     </div>
-  )
+  );
 }
 
 export default function App() {
