@@ -1,9 +1,6 @@
-// Em um app real, isso seria dividido em vários arquivos
 import { useState, useEffect } from 'react'
-import { supabase } from './supabaseClient' // Nosso cliente Supabase
+import { supabase } from './supabaseClient' 
 
-// --- Componente de Login (HU02) ---
-// Este é o método base que o time usará
 function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -19,7 +16,6 @@ function Login() {
       })
       if (error) throw error
       console.log('Login com sucesso!', data)
-      // O App.jsx vai detectar a mudança e mostrar o Dashboard
     } catch (error) {
       alert(error.message)
     } finally {
@@ -52,14 +48,11 @@ function Login() {
   )
 }
 
-// --- Componente do Dashboard (HU03) ---
-// Este é o método base que o time usará
 function Dashboard({ session }) {
-  const [racks, setRacks] = useState([]) // Onde vamos guardar os racks
+  const [racks, setRacks] = useState([])
   const [loadingRacks, setLoadingRacks] = useState(true)
 
   useEffect(() => {
-    // Busca dados do nosso backend FastAPI
     const apiUrl = import.meta.env.VITE_API_BASE_URL + "/racks"
     
     fetch(apiUrl)
@@ -72,7 +65,7 @@ function Dashboard({ session }) {
         console.error("Erro ao buscar racks:", err)
         setLoadingRacks(false)
       })
-  }, []) // O [] vazio significa que isso roda só 1 vez, quando o componente carrega
+  }, [])
 
   return (
     <div style={{ padding: '20px' }}>
@@ -92,18 +85,14 @@ function Dashboard({ session }) {
   )
 }
 
-
-// --- Componente principal que controla tudo ---
 export default function App() {
   const [session, setSession] = useState(null)
 
   useEffect(() => {
-    // 1. Verifica se já existe uma sessão
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
     })
 
-    // 2. Escuta por mudanças na autenticação (login, logout)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
         setSession(session)
@@ -112,7 +101,6 @@ export default function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Se não tem sessão, mostra Login. Se tem, mostra o Dashboard.
   return (
     <div>
       {!session ? <Login /> : <Dashboard session={session} />}
