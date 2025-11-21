@@ -1,61 +1,58 @@
-/* Definindo as cores do tema (FUNDO CLARO) */
+/* Paleta de Cores Moderna (Baseada na Imagem) */
 :root {
-  --bb-yellow: #FFEC00; /* Amarelo oficial */
-  --bb-blue: #004A8F;   /* Azul oficial */
-  --light-bg: #F4F4F4;  /* Fundo da página (cinza bem claro) */
-  --light-bg-card: #FFFFFF; /* Fundo dos "cards" (branco) */
-  --text-dark: #111;
-  --grid-line: #DDDDDD; /* Linhas do grid (cinza claro) */
-  --border-color: #CCCCCC;
+  /* Cores de Fundo */
+  --bg-page: #F8F9FA;       /* Fundo da página (cinza muito claro) */
+  --bg-card: #FFFFFF;       /* Fundo dos cards (branco) */
+  --bg-rack-empty: #E9ECEF; /* Rack vazio (cinza azulado claro) */
+  
+  /* Cores de Status */
+  --status-available: #28A745; /* Verde */
+  --status-partial: #FFC107;   /* Amarelo */
+  --status-full: #DC3545;      /* Vermelho */
+  --rack-border: #DEE2E6;      /* Borda sutil dos racks */
+
+  /* Cores de Texto */
+  --text-primary: #343A40;  /* Cinza escuro (quase preto) */
+  --text-secondary: #6C757D; /* Cinza médio */
+  --text-light: #FFFFFF;
+
+  /* Cores da Marca (Azul Tech) */
+  --brand-primary: #0056b3; 
+  --brand-hover: #004494;
 }
 
-/* Reset básico */
 body, html, #root {
   margin: 0;
   padding: 0;
   height: 100%;
   width: 100%;
-  box-sizing: border-box;
+  font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
 }
 
-body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-  background-color: var(--light-bg);
-  color: var(--text-dark);
-}
-
-/* Estilo padrão dos botões */
+/* Botões Modernos */
 button {
-  background-color: var(--bb-yellow);
-  color: var(--text-dark);
-  border: none;
-  padding: 10px 16px;
-  font-size: 16px;
-  font-weight: bold;
-  border-radius: 5px;
+  font-family: inherit;
   cursor: pointer;
+  border: none;
+  outline: none;
   transition: all 0.2s ease;
 }
 
-button:hover {
-  filter: brightness(0.95);
+/* Scrollbar mais bonita */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
 }
-
-button:disabled {
-  background-color: #E0E0E0;
-  color: #999;
-  cursor: not-allowed;
+::-webkit-scrollbar-track {
+  background: #f1f1f1; 
 }
-
-/* Estilo padrão dos inputs */
-input[type="email"], input[type="password"] {
-  width: 100%;
-  padding: 12px 10px;
-  margin-bottom: 15px;
-  background-color: var(--light-bg-card);
-  border: 1px solid var(--border-color);
-  border-radius: 5px;
-  color: var(--text-dark);
-  font-size: 16px;
-  box-sizing: border-box; 
+::-webkit-scrollbar-thumb {
+  background: #ccc; 
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #aaa; 
 }
