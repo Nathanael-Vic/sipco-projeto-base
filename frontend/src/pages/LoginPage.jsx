@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { supabase } from '../../supabaseClient';
+import { supabase } from '../api/supabase';
 
 const styles = {
   loginWrapper: { display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#F8F9FA' },

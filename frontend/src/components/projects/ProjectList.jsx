@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import Header from '../common/Header';
+import Header from '../../components/common/Header'; // Corrected import path
 import CreateProjectModal from './CreateProjectModal';
+import { supabase } from '../../api/supabase'; // Import supabase client
 
 const styles = {
   wrapper: { minHeight: '100vh', backgroundColor: '#F8F9FA', display: 'flex', flexDirection: 'column' },
@@ -28,12 +29,33 @@ export default function ProjectList({ session, onSelectProject, onLogout }) {
   const [deleteInput, setDeleteInput] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const getAuthHeaders = async () => {
+    const { data: { session }, error } = await supabase.auth.getSession();
+    if (error || !session) {
+      throw new Error('Usuário não autenticado.');
+    }
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${session.access_token}`,
+    };
+  };
+
   useEffect(() => { fetchProjects(); }, []);
 
   const fetchProjects = async () => {
-    const res = await fetch(import.meta.env.VITE_API_BASE_URL + "/projects");
-    const data = await res.json();
-    setProjects(data.projects || []);
+    try {
+      const headers = await getAuthHeaders();
+      const res = await fetch(import.meta.env.VITE_API_BASE_URL + "/projects", { headers });
+      const data = await res.json();
+      
+      if (!res.ok) {
+        throw new Error(data.detail || "Erro ao buscar projetos.");
+      }
+      setProjects(data || []); // API now returns list directly
+    } catch (error) {
+      console.error('Erro ao carregar projetos:', error);
+      // alert(`Erro ao carregar projetos: ${error.message}`);
+    }
   };
 
   const openDeleteModal = (e, project) => { e.stopPropagation(); setProjectToDelete(project); setDeleteInput(''); };
@@ -42,14 +64,24 @@ export default function ProjectList({ session, onSelectProject, onLogout }) {
     if (deleteInput !== projectToDelete.nome) return;
     setIsDeleting(true);
     try { 
-      await fetch(`${import.meta.env.VITE_API_BASE_URL}/projects/${projectToDelete.id}`, { method: "DELETE" }); 
+      const headers = await getAuthHeaders();
+      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/projects/${projectToDelete.id}`, { 
+        method: "DELETE",
+        headers,
+      }); 
+      
+      if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Erro ao deletar projeto.");
+      }
+
       setTimeout(() => { 
         setIsDeleting(false); 
         setProjectToDelete(null); 
         fetchProjects(); 
       }, 500); 
     } catch (err) { 
-      alert("Erro ao deletar"); 
+      alert("Erro ao deletar: " + err.message); 
       setIsDeleting(false); 
     }
   };
@@ -78,7 +110,7 @@ export default function ProjectList({ session, onSelectProject, onLogout }) {
                 <div key={p.id} style={styles.projectCard} onClick={() => onSelectProject(p)}>
                   <button style={styles.btnDeleteProject} onClick={(e) => openDeleteModal(e, p)} title="Excluir projeto">✕</button>
                   <h3 style={{margin: '0 0 10px', color: '#343A40'}}>{p.nome}</h3>
-                  <p style={{margin: 0, color: '#666', fontSize: '14px'}}>Dimensões: {p.largura_mm / 40}x{p.altura_mm / 40} blocos</p>
+                  <p style={{margin: 0, color: '#666', fontSize: '14px'}}>Dimensões: {p.largura_mm / 600}x{p.altura_mm / 600} blocos</p>
                   <p style={{margin: '5px 0 0', color: '#ADB5BD', fontSize: '12px'}}>ID: #{p.id}</p>
                 </div>
               ))}
@@ -90,7 +122,10 @@ export default function ProjectList({ session, onSelectProject, onLogout }) {
       {showCreateModal && (
         <CreateProjectModal 
           onClose={() => setShowCreateModal(false)} 
-          onSuccess={fetchProjects} 
+          onSuccess={(createdProject) => {
+            setShowCreateModal(false);
+            onSelectProject(createdProject, true); // Pass new project and flag for suggestion
+          }} 
         />
       )}
 
